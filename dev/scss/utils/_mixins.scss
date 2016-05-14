@@ -61,6 +61,18 @@
   box-shadow:$left $top $blur $color #{$inset};
 }
 
+@mixin clearfix() {
+  &:before,
+  &:after {
+    content: '';
+    display: table;
+  }
+
+  &:after {
+    clear: both;
+  }
+}
+
 @mixin input-placeholder () {
   &::-webkit-input-placeholder {
     @content;
