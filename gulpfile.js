@@ -1,9 +1,10 @@
 // Gulp file
 var gulp            = require('gulp'),
-    assetsPath      = "./",
+    devPath         = "./dev",
+    distPath        = "./dist",
     scriptsArray    = [
-        assetsPath+'/js/*/*.js',
-        assetsPath+'/js/main.js'
+        devPath + '/js/*/*.js',
+        devPath + '/js/main.js'
     ],
     ignoreList  = [
         "*.git",
@@ -17,18 +18,20 @@ var gulp            = require('gulp'),
     ]
 ;
 
-
 // Plugins
-var sass        = require('gulp-sass');
-    rsync       = require('rsyncwrapper').rsync,
-    maps        = require('gulp-sourcemaps'),
-    rename      = require('gulp-rename');
+var 
+    chalk       = require('chalk'),
     concat      = require('gulp-concat'),
-    uglify      = require('gulp-uglify'),
     gutil       = require('gulp-util'),
+    imageMin    = require('gulp-imagemin'),
     inquirer    = require('inquirer'),
+    livereload  = require('gulp-livereload'),
+    maps        = require('gulp-sourcemaps'),
     notifier    = require('node-notifier'),
-    chalk       = require('chalk')
+    rename      = require('gulp-rename');
+    rsync       = require('rsyncwrapper').rsync,
+    sass        = require('gulp-sass'),
+    uglify      = require('gulp-uglify'),    
 ;
 
 
@@ -38,30 +41,28 @@ var sass        = require('gulp-sass');
 
 // Default - watch for any changes
 gulp.task('default', function() {
-    gulp.watch(assetsPath+'sass/*.scss',['styles']);
-    gulp.watch(assetsPath+'/scss/*/*.scss', ['styles']);
-    gulp.watch(assetsPath+'/js/*.js', ['scripts']);
-    gulp.watch(assetsPath+'/js/*/*.js', ['scripts']);
+    gulp.watch(devPath + '/scss/**/*.scss', ['styles']);
+    gulp.watch(devPath + '/js/**/*.js', ['scripts']);
+    gulp.watch(distPath + '/img', ['images']);
 });
 
-// Compile SASS
 gulp.task('styles', function() {
-    return gulp.src(assetsPath+'sass/main.scss')
-    	.pipe(maps.init())
+    return gulp.src(devPath + 'sass/main.scss')
+        .pipe(maps.init())
 
-        // Create an unminified CSS file first
-        .pipe(sass({
-            errLogToConsole: true,
-            outputStyle: 'expanded'
-        }))
-        .pipe(gulp.dest('css/'))
+        // // Create an unminified CSS file first
+        // .pipe(sass({
+        //     errLogToConsole: true,
+        //     outputStyle: 'expanded'
+        // }))
+        // .pipe(gulp.dest('css/'))
 
         // Now create some minified CSS
         .pipe(sass({
             errLogToConsole: true,
             outputStyle: 'compressed'
         }))
-        .pipe(maps.write(assetsPath))
+        .pipe(maps.write(devPath + "/css"))
 
         // Rename it so we don't overwrite our unmin CSS
         .pipe(rename({
@@ -70,7 +71,6 @@ gulp.task('styles', function() {
         .pipe(gulp.dest('css/'));
 });
 
-// Get dat javascript, yo
 gulp.task('scripts', function () {
     return gulp.src(scriptsArray)
         .pipe(maps.init())
@@ -80,7 +80,13 @@ gulp.task('scripts', function () {
         .pipe(rename({
             suffix: '.min'
         }))
-        .pipe(gulp.dest('js/'));
+        .pipe(gulp.dest(deistPath + '/js'));
+});
+
+gulp.task('images', function() {
+    gulp.src(distPath + '/img')
+    .pipe(imagemin)
+    .pipe(gulp.dest(distPath + '/img'))
 });
 
 // -------------------------------------------------
@@ -98,8 +104,8 @@ gulp.task('deploystaging', function(callback) {
         if(answers.deployConfirm){
             rsync({
                 ssh: true,
-                src: assetsPath,
-                dest: 'prpl@75.112.170.213:/var/www/vhosts/jom-misc/digital-new-names/01',
+                src: distPath,
+                dest: 'path/to/destination',
                 recursive: true,
                 deleteAll: true,
                 args: ['--verbose', '--compress', '--archive'],
@@ -113,7 +119,6 @@ gulp.task('deploystaging', function(callback) {
                     callback();
                 }else{
                     gutil.log('rsync result: ','\n', chalk.gray(stdout));
-                    // gutil.log('command run: ', chalk.magenta(cmd),'\n', 'you can also use this in the command line without gulp ^^^');
                     notifier.notify({ message: 'rsync complete' });
                     callback();
                 }

@@ -28,3 +28,13 @@
 @function font($path, $base: $base-url) {
   @return asset($base, 'fonts/', $path);
 }
+
+// Sass grid
+@function columns($num, $of: 24, $maxed: false) {
+    @if($maxed == true) {
+        @return $num  * $grid--column-width;
+    } 
+    @else {
+        @return 100vw / $of * $num;
+    }
+}
