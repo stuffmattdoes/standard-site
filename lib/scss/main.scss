@@ -1,5 +1,8 @@
 @charset 'UTF-8';
 
+// These imports should happen in the following order! Don't change it.
+// Otherwise, you'll get lots of errors
+
 // 1. Configuration and helpers
 @import
   'utils/variables',

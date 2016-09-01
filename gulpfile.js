@@ -41,6 +41,7 @@ var
 
 // Default - watch for any changes
 gulp.task('default', ['styles', 'scripts', 'images'], function() {
+    livereload.listen();
     gulp.watch(devPath + '/scss/**/*.scss', ['styles']);
     gulp.watch(devPath + '/js/**/*.js', ['scripts']);
     gulp.watch(distPath + '/img/original/**', ['images']);
